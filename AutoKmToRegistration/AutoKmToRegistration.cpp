@@ -91,7 +91,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	try
 	{
 			
-		// setting up a page 
+		// load the page
 		std::cout << "go get page!" << std::endl;
 		boost::asio::io_service io_service;
 		std::string host = "intranet.topic.nl";
