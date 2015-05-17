@@ -91,7 +91,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	try
 	{
 			
-
+		// setting up a page 
 		std::cout << "go get page!" << std::endl;
 		boost::asio::io_service io_service;
 		std::string host = "intranet.topic.nl";
@@ -103,6 +103,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		context.set_default_verify_paths();
 		clientSSL c(io_service, context, iterator, host);
 		io_service.run();
+
 	}
 	catch (std::exception& e)
 	{
