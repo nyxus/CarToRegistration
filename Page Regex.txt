@@ -1,0 +1,1 @@
+<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d[1-9]{1,2}" VALUE="" TABINDEX=[1-9]{1,2} SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours\('u_alg_u_d',[1-9]{1,2}\);"></td>

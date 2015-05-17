@@ -1,0 +1,1315 @@
+ranet.topic.nl80\profituren\include\userInterface.php on line 49
+
+Notice: A non well formed numeric value encountered in C:\inetpub\wwwroot\wss\VirtualDirectories\intranet.topic.nl80\profituren\include\userInterface.php on line 52
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"><title>Topic - Urentool</title>
+<!-- <link rel="stylesheet" type="text/css" href="../styles/topicstyle.css"> -->
+<link rel="stylesheet" type="text/css" href="../../styles/topicstyle.css">
+<SCRIPT TYPE="text/javascript">
+            /* This function rounds a float to user defined precision */
+            function round ( val, precision ) {
+                return parseFloat(parseFloat(val).toFixed(precision));
+            }
+
+            var reInteger = /^\d+$/;
+            var reFloat = /^((\d+(\.\d*)?)|((\d*\.)?\d+))$/;
+            var reNegFloat = /^(([-]?\d+(\.\d*)?)|((\d*\.)?\d+))$/;
+
+            /*  This function validates strings containing a float. If a  string
+            *   is valid then the float value is returned, otherwise 0 is
+            *   returned. A string is valid when it is containing a correctly
+            *   formatted float, which is smaller than or equal to 16.
+            */
+            function parseF(str, truncate) {
+                if(truncate == null) {
+                    truncate = true;
+                } else {
+                    truncate = false;
+                }
+                var value;
+                if(str.length == 0) {
+                    value = 0;
+                } else {
+                    str = str.replace(/,/, ".");
+                    if(reFloat.test(str)) {
+                        value = round(parseFloat(str),2);
+                        if(truncate && (value > 16)) {
+                            value = 16;
+                        }
+                    } else {
+                        value = 0;
+                    }
+                }
+                return  value;
+            }
+
+            /*  This function validates strings containing a float. If a  string
+            *   is valid then the float value is returned, otherwise 0 is
+            *   returned. A string is valid when it is containing a correctly
+            *   formatted float, which is smaller than or equal to 16.
+            */
+            function parseNegF(str, truncate) {
+                if(truncate == null) {
+                    truncate = true;
+                } else {
+                    truncate = false;
+                }
+                var value;
+                if(str.length == 0) {
+                    value = 0;
+                } else {
+                    str = str.replace(/,/, ".");
+                    if(reNegFloat.test(str)) {
+                        value = round(parseFloat(str),2);
+                        if(truncate && (value > 16)) {
+                            value = 16;
+                        }
+                    } else {
+                        value = 0;
+                    }
+                }
+                return  value;
+            }
+
+            /*  This function validates strings containing an integer.
+            *   The function returns true when the string contains a valid
+            *   integer.
+            */
+            function isInteger(str) {
+                if((str.length == 0) || (str.charAt(0) == '0')) {
+                    return false;
+                } else {
+                    return reInteger.test(str);
+                }
+            }
+
+            /*  This function returns the sum of all the hours booked on a given
+            *   day on this timesheet.
+            */
+            function sumHours(daystr) {
+                var value;
+                var total = 0;
+                var names = Array(4);
+                names[0] = "u_verlof_u_d" + daystr;
+                names[1] = "u_cur_u_d" + daystr;
+                names[2] = "u_ziek_u_d" + daystr;
+                names[3] = "u_alg_u_d" + daystr;
+                
+                names[4] = "u_feest_u_d" + daystr;
+                names[5] = "u_lee_u_d" + daystr;
+                names[6] = "u_mob_u_d" + daystr;
+                names[7] = "u_ov_u_d" + daystr;
+                names[8] = "u_bv_u_d" + daystr;
+                element = document.getElementsByName(names[0])[0];
+                
+                value = parseNegF(element.value);
+                
+                if(value != 0) {
+                    element.value = value;
+                    total += value;
+                } else {
+                    element.value = "";
+                }
+                for(j=1; j<names.length; j++) {
+                    element = document.getElementsByName(names[j])[0];
+                    value = parseF(element.value);
+                    if(value != 0) {
+                        element.value = value;
+                        total += value;
+                    } else {
+                        element.value = "";
+                    }
+                }
+                return total;
+            }
+
+            /*  This function updates the total hours column after the user has
+            *   updated a field. The day and the name of the field are passed
+            *   passed to this function. If the total exceeds 16 hours, the
+            *   field will be emptied. Otherwise, the background color of the
+            *   total field will be set correctly and this function ensures the
+            *   comment and total kilometer fields are checked as well.
+            */
+            function updateTotal(fieldName, day)
+            {
+                var daystr = day.toString();
+                var sum = 0;
+                var date = new Date();
+                var hours = 0;
+                var name = "u_total_orig_d" + daystr;
+                var value = document.getElementsByName(name)[0].value;
+                if(value.toString().length != 0) {
+                    sum += parseFloat(value);
+                }
+                hours = sumHours(daystr);
+                sum += hours;
+		sum = sum.toFixed(2);
+                if((sum > 16) && (fieldName.length != 0)) {
+                    name = fieldName+daystr;
+                    document.getElementsByName("u_total_d" + daystr)[0].value = sum - document.getElementsByName(name)[0].value;
+                    document.getElementsByName(name)[0].value = "";
+                } else {
+                    name = "u_total_d" + daystr;
+                    document.getElementsByName(name)[0].value = parseF(sum.toString());
+                    if(document.getElementsByName("disabled_d"+daystr)[0].value != "disabled") {
+                        date.setFullYear(2015 \r\n,4,day);
+                        weekDay = date.getDay();
+                        if((weekDay != 0) && (weekDay != 6)) {
+                            if(sum < 8){
+                                document.getElementsByName(name)[0].style.backgroundColor = "rgb(255, 195, 195)";
+                            }
+                            if(sum == 8){
+                                document.getElementsByName(name)[0].style.backgroundColor = "white";
+                            }
+                            if(sum > 8){
+                                document.getElementsByName(name)[0].style.backgroundColor = "rgb(255, 255, 195)";
+                            }
+                        } else {
+                            if(sum == 0){
+                                document.getElementsByName(name)[0].style.backgroundColor = "white";
+                            }
+                            if(sum > 0){
+                                document.getElementsByName(name)[0].style.backgroundColor = "rgb(255, 255, 195)";
+                            }
+                        }
+                        validateComment(day, hours);
+                    }
+                    updateTotalKilometers(day, hours);
+                }
+            }
+
+            /*  This function updates the total kilometer field, its second
+            *   parameter is optional it is only set when this function is
+            *   called from the updateTotal function. If total hours is equal to
+            *   zero the kilometer field's background highlighting will be set
+            *   accordingly. Otherwise the total kilometer field will be updated.
+            */
+            function updateTotalKilometers(day, hours)
+            {
+                var daystr = day.toString();
+                var sum = 0;
+                var name = "u_totalKM_d" + daystr;
+                var value = document.getElementsByName(name)[0].value;
+                var zkm = 0;
+                name = "u_totalKM_orig_d" + daystr;
+                value = document.getElementsByName(name)[0].value;
+                if(value.toString().length != 0) {
+                    sum += parseInt(value);
+                }
+                if (hours == null) {
+                    hours = sumHours(daystr);
+                }
+
+                name = "u_zkm_u_d" + daystr;
+                var element = document.getElementsByName(name)[0];
+                var value = element.value;
+                if(isInteger(value)) {
+                    zkm = parseInt(value);
+                    sum += zkm;
+                } else {
+                    element.value = "";
+                }
+                if(document.getElementsByName("disabled_d"+daystr)[0].value != "disabled") {
+                    if((hours == 0) && (zkm != 0)) {
+                      document.getElementsByName(name)[0].style.backgroundColor = "rgb(255, 195, 195)";
+                    } else {
+                        document.getElementsByName(name)[0].style.backgroundColor = "white";
+                    }
+                }
+                name = "u_totalKM_d" + daystr;
+                document.getElementsByName(name)[0].value = sum.toString();
+            }
+
+            /*  This function checks whether hours have been booked on a day
+            *   where a comment was booked. It will set the background
+            *   highlighting of the comment field accordingly.
+            */
+            function validateComment(day, hours)
+            {
+                var daystr = day.toString();
+                if (hours == null) {
+                    hours = sumHours(daystr);
+                }
+                name = "u_toelichting_o_d" + daystr;
+                var element = document.getElementsByName(name)[0];
+                if((hours == 0) && (element.value != "")) {
+                    document.getElementsByName(name)[0].style.backgroundColor = "rgb(255, 195, 195)";
+                } else {
+                    document.getElementsByName(name)[0].style.backgroundColor = "white";
+                }
+            }
+
+            /*  This function updates the total of the column corresponding to
+            *   the fieldname parameter.
+            */
+            function updateTotalsColumn(fieldName)
+            {
+                var numberOfDays = 31;
+                var name;
+                var sum = 0;
+                for(i=1; i<=numberOfDays; i++) {
+                    name = fieldName+i;
+		    if (fieldName.substring(0,12) == "u_verlof_u_d") {
+                        sum += parseNegF(document.getElementsByName(name)[0].value, false);
+		    } else {
+                        sum += parseF(document.getElementsByName(name)[0].value, false);
+		    }
+                }
+		if (fieldName.substring(0,12) == "u_verlof_u_d") {
+                    document.getElementsByName(fieldName)[0].value = parseNegF(""+sum, false);
+		} else {
+                    document.getElementsByName(fieldName)[0].value = parseF(""+sum, false);
+		}
+            }
+
+            /*  This function is triggered when after a user enters hours in a
+            *   field. It handles the updating of all corresponding totals.
+            */
+            function updateTotalsHours(fieldName, day)
+            {
+                updateTotal(fieldName, day);
+                updateTotalsColumn(fieldName);
+                updateTotalsColumn("u_total_d");
+            }
+
+            /*  This function is triggered when after a user enters kilometers
+            *   in a field. It handles the updating of all corresponding totals.
+            */
+            function updateTotalsKilometers(fieldName, day)
+            {
+                updateTotalKilometers(day)
+                updateTotalsColumn(fieldName);
+                updateTotalsColumn("u_totalKM_d");
+            }
+
+            /*  This function decodes HTML entities, so that they are displayed
+            *   correctly when updating the dropdown box using javascript.
+            */
+            function html_entity_decode(str) {
+                var ta=document.createElement("textarea");
+                ta.innerHTML=str.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                return ta.value;
+            }
+
+            /*  This function is used for filling the project dropdown box with
+            *   the available project phases for each period.
+            */
+            function updateProjectList(year, month, selectedValue)
+            {
+                var monthIndex = month + 1;
+                var projectList = document.getElementsByName("project")[0];
+                var phases = new Array(3);
+                year -= 2014;
+                phases[0] = new Array(12);
+                
+                phases[1] = new Array(12);
+                
+                phases[2] = new Array(12);
+                
+                phases[0][1] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2014)|000001+2014"]
+                phases[0][2] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2014)|000001+2014"]
+                phases[0][3] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2014)|000001+2014"]
+                phases[0][4] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2014)|000001+2014"]
+                phases[0][5] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2014)|000001+2014"]
+                phases[0][6] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2014)|000001+2014"]
+                phases[0][7] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2014)|000001+2014"]
+                phases[0][8] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2014)|000001+2014"]
+                phases[0][9] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2014)|000001+2014"]
+                phases[0][10] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2014)|000001+2014"]
+                phases[0][11] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2014)|000001+2014"]
+                phases[0][12] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2014)|000001+2014"]
+                phases[1][1] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2015)|000001+2015"]
+                phases[1][2] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2015)|000001+2015"]
+                phases[1][3] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2015)|000001+2015"]
+                phases[1][4] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2015)|000001+2015"]
+                phases[1][5] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2015)|000001+2015"]
+                phases[1][6] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2015)|000001+2015"]
+                phases[1][7] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2015)|000001+2015"]
+                phases[1][8] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2015)|000001+2015"]
+                phases[1][9] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2015)|000001+2015"]
+                phases[1][10] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2015)|000001+2015"]
+                phases[1][11] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2015)|000001+2015"]
+                phases[1][12] = [html_entity_decode("Topic") + " (TOPIC - TOPIC Uren 2015)|000001+2015"]
+                phases[2][1] = ""
+                phases[2][2] = ""
+                phases[2][3] = ""
+                phases[2][4] = ""
+                phases[2][5] = ""
+                phases[2][6] = ""
+                phases[2][7] = ""
+                phases[2][8] = ""
+                phases[2][9] = ""
+                phases[2][10] = ""
+                phases[2][11] = ""
+                phases[2][12] = ""
+                projectList.options.length = 0;
+                var split;
+                if( selectedValue == null) {
+                    selectedValue = "000001+2015";
+                }
+                for (i=0; i<phases[year][monthIndex].length; i++){
+                    split = phases[year][monthIndex][i].split("|");
+                    if(split[1] == selectedValue) {
+                        projectList.options[projectList.options.length]=new Option(split[0], split[1], true);
+                    } else {
+                        projectList.options[projectList.options.length]=new Option(split[0], split[1]);
+                    }
+                }
+                if(projectList.options.length == 0) {
+                    document.getElementsByName("SUBMIT")[0].disabled = true;
+                } else {
+                    document.getElementsByName("SUBMIT")[0].disabled = false;
+                }
+            }
+
+            /*  This function returns the selected value from dropdown box.
+            */
+            function getSelectedValue(selectName)
+            {
+                var select = document.getElementsByName(selectName)[0];
+                if(select.options.length > 0) {
+                    return select.options[select.selectedIndex].value;
+                } else {
+                    return "";
+                }
+            }
+
+            /*  This function handles the updating of the projects dropdown box,
+            *   when a different year is selected.
+            */
+            function updateYear(year)
+            {
+                var month = document.getElementsByName("month")[0].selectedIndex;
+                var selectedProject = getSelectedValue("project");
+                updateProjectList(year,month,selectedProject);
+            }
+
+            /*  This function handles the updating of the projects dropdown box,
+            *   when a different month is selected.
+            */
+            function updateMonth(month)
+            {
+                var year = getSelectedValue("year");
+                var selectedProject = getSelectedValue("project");
+                updateProjectList(year,month,selectedProject);
+            }
+Notice: A non well formed numeric value encountered in C:\inetpub\wwwroot\wss\VirtualDirectories\intranet.topic.nl80\profituren\include\userInterface.php on line 533
+
+Notice: A non well formed numeric value encountered in C:\inetpub\wwwroot\wss\VirtualDirectories\intranet.topic.nl80\profituren\include\userInterface.php on line 535
+
+            /*  This function disables the fieldName
+            */
+            function disableField(fieldName)
+            {
+                var element = document.getElementsByName(fieldName)[0];
+                element.disabled = true;
+                element.style.backgroundColor = "rgb(221, 221, 221)";
+                element.style.color = "black";
+            }
+
+            /*  This function enables the fieldName
+            */
+            function enableField(fieldName)
+            {
+                var element = document.getElementsByName(fieldName)[0];
+                element.disabled = false;
+                element.style.backgroundColor = "white";
+            }
+
+            /*  This function checks all overtime fields on a timesheet and
+            *   enables disables overtime fields correspondingly. Furthermore it
+            *   computes the total amount of each overtime type, which is then
+            *   passed to the checkTVT function.
+            */
+            function checkOverTime()
+            {
+                var numberOfDays = 31;
+                var endOverHours1 = 31;
+                var endOverHours2 = 31;
+                var endOverHours3 = 31;
+                var totals = new Array(3);
+                var elements = new Array(3);
+                var values = new Array(3);
+                totals[0] = 0;
+                totals[1] = 0;
+                totals[2] = 0;
+                for(i=1;i<=numberOfDays;i++) {
+                    var sum = 0;
+                    var name = "u_total_orig_d" + i;
+                    var value = document.getElementsByName(name)[0].value;
+                    if(value.toString().length != 0) {
+                        sum += parseFloat(value);
+                    }
+                    sum += sumHours(i);
+                    valueIndex = -1;
+                    for(j=0;j<3;j++) {
+                        name = "u_over_u"+(j+1)+"_d"+i;
+                        elements[j] = document.getElementsByName(name)[0];
+                        values[j] = parseF(elements[j].value);
+                        if((values[j] != 0) &&(sum <= 16)) {
+                            valueIndex = j;
+                        } else {
+                            elements[j].value = "";
+                        }
+                    }
+		    name_n = "u_norm_u_d"+i;
+		    elements_n = document.getElementsByName(name_n)[0];
+		    values_n = parseF(elements_n.value);
+		    if (values_n > 8) {
+			tmp_value = totals[0] + values_n - 8
+		        totals[0] = parseF(tmp_value.toFixed(2));
+    		    }
+                    if(valueIndex != -1) {
+                        elements[valueIndex].value = values[valueIndex];
+                        totals[valueIndex] +=  values[valueIndex];
+                        if(!(elements[valueIndex].disabled)) {
+                            if(valueIndex==0){
+                                name = "u_over_u2_d"+i;
+                                disableField(name);
+                                name = "u_over_u3_d"+i;
+                                disableField(name);
+                            } else if(valueIndex == 1) {
+                                name = "u_over_u1_d"+i;
+                                disableField(name);
+                                name = "u_over_u3_d"+i;
+                                disableField(name);
+                            } else {
+                                name = "u_over_u1_d"+i;
+                                disableField(name);
+                                name = "u_over_u2_d"+i;
+                                disableField(name);
+                            }
+                        }
+                    } else {
+                        if(document.getElementsByName("disabled_d"+i)[0].value != "disabled") {
+                            if(endOverHours1 >= i) {
+                                name = "u_over_u1_d"+i;
+                                enableField(name);
+                            }
+                            if(endOverHours2 >= i) {
+                                name = "u_over_u2_d"+i;
+                                enableField(name);
+                            }
+                            if(endOverHours3 >= i) {
+                                name = "u_over_u3_d"+i;
+                                enableField(name);
+                            }
+                        }
+                    }
+                }
+                checkTVT(totals);
+            }
+
+            /*  This function checks for all days whether TVT is booked on a day
+            *   on which overtime was booked. Furthermore it checks if the total
+            *   amount of each TVT type doesn't exceed the total amount of the
+            *   corresponging overtime type. Background highlighting is applied
+            *   accordingly.
+            */
+            function checkTVT(totals)
+            {
+                var numberOfDays = 31;
+                var totalsTVT = new Array(3);
+                totalsTVT[0] = 0;
+                totalsTVT[1] = 0;
+                totalsTVT[2] = 0;
+                for(i=1;i<=numberOfDays;i++) {
+                    found = false;
+                    var name = "u_TVT_d"+i;
+                    var TVTelement = document.getElementsByName(name)[0];
+                    var TVTvalue = parseF(TVTelement.value, false);
+                    if(TVTvalue != 0) {
+                        TVTelement.value = TVTvalue;
+		    	name_n = "u_norm_u_d"+i;
+		   	elements_n = document.getElementsByName(name_n)[0];
+		    	values_n = parseF(elements_n.value);
+                        for(j=0;j<3;j++) {
+                            name = "u_over_u"+(j+1)+"_d"+i;
+                            element = document.getElementsByName(name)[0];
+                            if(parseF(element.value) != 0) {
+                                found = true;
+                                totalsTVT[j] += TVTvalue;
+                            }
+                        }
+		    	name_n = "u_norm_u_d"+i;
+		   	elements_n = document.getElementsByName(name_n)[0];
+		    	values_n = parseF(elements_n.value);
+		    	if (values_n > 8) {
+		            found = true;
+		            totalsTVT[j] += TVTvalue;
+    		    	}
+                        if(!found) {
+                            if(document.getElementsByName("disabled_d"+i)[0].value != "disabled") {
+                                TVTelement.style.backgroundColor = "rgb(255, 195, 195)";
+                            }
+                        }
+                    } else {
+                        TVTelement.value = "";
+                    }
+                }
+                for(i=1;i<=numberOfDays;i++) {
+                    var name = "u_TVT_d"+i;
+                    var TVTelement = document.getElementsByName(name)[0];
+                    if(parseF(TVTelement.value) != 0) {
+                        for(j=0;j<3;j++) {
+                            name = "u_over_u"+(j+1)+"_d"+i;
+                            element = document.getElementsByName(name)[0];
+		    	    value = parseF(element.value);
+                            if(j == 0) {
+		    		name_n = "u_norm_u_d"+i;
+		   		elements_n = document.getElementsByName(name_n)[0];
+		    		values_n = parseF(elements_n.value);
+		    		if (values_n > 8) {
+		            	    value = value + values_n - 8;
+    		    		}
+                            }
+                            if(value != 0) {
+                                if(document.getElementsByName("disabled_d"+i)[0].value != "disabled") {
+                                    if(totalsTVT[j] > totals[j]) {
+                                        TVTelement.style.backgroundColor = "rgb(255, 195, 195)";
+                                    } else {
+                                        TVTelement.style.backgroundColor = "white";
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        if(document.getElementsByName("disabled_d"+i)[0].value != "disabled") {
+                            TVTelement.style.backgroundColor = "white";
+                        }
+                    }
+                }
+            }
+
+            /*  This function checks whether an error has occured in a column.
+            *   If so it will return false.
+            */
+            function checkColumn(fieldName)
+            {
+                var numberOfDays = 31;
+                var name;
+                var valid = false;
+                for(i=1;i<=numberOfDays;i++){
+                    name = fieldName+i;
+                    var disabled = document.getElementsByName(name)[0].disabled;
+                    var color = document.getElementsByName(name)[0].style.backgroundColor.toString();
+                    if((!disabled) && (color != "white") && (color != "#ffffff") && (color != "")) {
+                        valid = true;
+                    }
+                }
+                return valid;
+            }
+
+            /*  This function copies the actual post action to a hidden submit
+            *   field.
+            */
+            function setSubmit(value)
+            {
+                var submit = document.getElementsByName("HIDDEN_SUBMIT")[0];
+                submit.value = value;
+            }
+
+            /*  This function validates the form before submitting it to the
+            *   server. On submit all buttons will be disabled and the post
+            *   action will be stored in a hidden field. On success, this hidden
+            *   field will be renamed to "SUBMIT" and will be posted to the
+            *   server. On failure, all buttons will be enabled and an error
+            *   message will be shown.
+            */
+            function validateForms()
+            {
+                var notifyKM = false;
+                var notifyTVT = false;
+                var notifyComment = false;
+                var valid = true;
+                var submit = document.getElementsByName("HIDDEN_SUBMIT")[0];
+                var sumbitButtons = document.getElementsByName("SUBMIT");
+                for(i=0;i<sumbitButtons.length;i++)
+                {
+                    sumbitButtons[i].disabled = true;
+                }
+
+            
+                notifyKM = checkColumn("u_zkm_u_d");
+                notifyComment = checkColumn("u_toelichting_o_d");
+                if(notifyKM){
+                    alert("Actie niet toegestaan. Er kunnen alleen kilometers geboekt worden als er in deze urenstaat ook uren geboekt zijn op dezelfde dag");
+                    valid = false;
+                }
+                if(notifyTVT){
+                    alert("Actie niet toegestaan. Een of meerdere TVT velden zijn incorrect ingevuld");
+                    valid = false;
+                }
+                if(notifyComment){
+                    alert("Actie niet toegestaan. Een toelichtings veld kan alleen ingevuld worden als er in deze urenstaat ook uren geboekt zijn op dezelfde dag");
+                    valid = false;
+                }
+                if(!valid) {
+                    for(i=0;i<sumbitButtons.length;i++)
+                    {
+                        sumbitButtons[i].disabled = false;
+                    }
+                } else {
+                    submit.name = "SUBMIT";
+                }
+                return valid;
+            }
+            /*  This function initializes all forms when a page is loaded.
+            */
+            function initializeForms()
+            {
+                updateProjectList(2015 \r\n,4);
+Notice: A non well formed numeric value encountered in C:\inetpub\wwwroot\wss\VirtualDirectories\intranet.topic.nl80\profituren\include\userInterface.php on line 830
+
+                for(i = 1; i <= 31; i++){
+                    updateTotal("",i);
+                }
+                updateTotalsColumn("u_verlof_u_d");
+                updateTotalsColumn("u_cur_u_d");
+                updateTotalsColumn("u_ziek_u_d");
+                updateTotalsColumn("u_alg_u_d");
+                updateTotalsColumn("u_feest_u_d");
+                updateTotalsColumn("u_lee_u_d");
+                updateTotalsColumn("u_mob_u_d");
+                updateTotalsColumn("u_zkm_u_d");
+                updateTotalsColumn("u_ov_u_d");
+                updateTotalsColumn("u_bv_u_d");
+                updateTotalsColumn("u_total_d");
+                updateTotalsColumn("u_totalKM_d");
+            }
+</SCRIPT>
+</head>
+
+<BODY onload="initializeForms();">
+
+<DIV class="c1">
+
+<h1>Urenstaat van Gerco Versloot</h1>
+<form action="index.php" method="POST"><INPUT NAME="SUBMIT" TYPE="SUBMIT" VALUE="Ga naar">
+<SELECT NAME="year" onchange="updateYear(this.options[this.selectedIndex].value);">
+	<OPTION value="2014" >2014</OPTION>
+	<OPTION value="2015" selected="selected">2015</OPTION>
+	<OPTION value="2016" >2016</OPTION>
+</SELECT>
+<SELECT NAME="month" onchange="updateMonth(this.selectedIndex);">
+	<OPTION value="1">Januari</OPTION>
+	<OPTION value="2">Februari</OPTION>
+	<OPTION value="3">Maart</OPTION>
+	<OPTION value="4">April</OPTION>
+	<OPTION value="5" selected="selected">Mei</OPTION>
+	<OPTION value="6">Juni</OPTION>
+	<OPTION value="7">Juli</OPTION>
+	<OPTION value="8">Augustus</OPTION>
+	<OPTION value="9">September</OPTION>
+	<OPTION value="10">Oktober</OPTION>
+	<OPTION value="11">November</OPTION>
+	<OPTION value="12">December</OPTION>
+</SELECT>
+<SELECT NAME="project" style="width:500px;"></SELECT></form>
+<a href="index.php?submit=kilometerregistratie&amp;year=2015 \r\n&amp;month=5">Kilometerregistratie May 2015 \r\n</a><br>Bekijk <a href="index.php?submit=maandoverzicht&amp;year=2015 \r\n&amp;month=5">maandoverzicht May 2015 \r\n</a><br>
+Bekijk <a href="index.php?submit=verlofoverzicht&amp;year=2015 \r\n&">verlofoverzicht 2015 \r\n</a><br>
+Bekijk <a href="index.php?submit=verlofplanning">verlofplanning</a><br>
+Bekijk <a href="index.php?submit=jaaroverzicht&amp;year=2015 \r\n&">jaaroverzicht 2015 \r\n</a><br>
+<br>
+<table align="center" border="1" cellpadding="1" cellspacing="0"><tbody><tr class="tableheader"><td class="urenstaat"><center>Vrijgave status</center></td></tr><tr class="table_km" align="center"><td class="urenstaat"><FONT COLOR="black"> Topic (TOPIC - TOPIC Uren 2015)</FONT></td></tr><tr class="table_km" align="center"><td class="urenstaat"><FONT COLOR="black"> Kilometerregistratie</FONT></td></tr>
+    </tbody></table>
+Notice: A non well formed numeric value encountered in C:\inetpub\wwwroot\wss\VirtualDirectories\intranet.topic.nl80\profituren\include\userInterface.php on line 994
+
+Notice: A non well formed numeric value encountered in C:\inetpub\wwwroot\wss\VirtualDirectories\intranet.topic.nl80\profituren\include\userInterface.php on line 996
+
+		<h2>Topic Formulier van May, 2015 \r\n</h2><br>
+        <form action="index.php?year=2015 \r\n&amp;month=5" method="POST" target="_blank"><INPUT NAME="SUBMIT" TYPE="SUBMIT" VALUE="Print TOPIC formulier"></form><form action="index.php" ONSUBMIT="return validateForms();" method="POST"><table align="center" cellpadding="0" cellspacing="2"><tr><td><table align="center" border="1" cellpadding="1" cellspacing="0" ><tr class="tableheader" align="center">
+        <td class="urenstaat">Week</td>
+        <td class="urenstaat">Dag</td>
+		<td class="urenstaat">d.d</td><td class="urenstaat">Algemene<br>uren</td>
+		<td class="urenstaat">Leegloop<br>uren</td>
+		<td class="urenstaat">Cursus<br>uren</td>
+		<td class="urenstaat">Ziekte<br>uren</td>
+		<td class="urenstaat">Mobiliteits<br>uren</td>
+		<td class="urenstaat">Verlof<br>uren</td>
+		<td class="urenstaat">Ouderschaps<br>verlof uren</td>
+		<td class="urenstaat">Bijzonder<br>verlof uren</td>
+		<td class="urenstaat">Feestdag<br>uren</td>
+		<td class="urenstaat">Totaal <br> uren</td>
+        <td class="urenstaat">Zakelijke <br> km</td>
+        <td class="urenstaat">Totaal <br> km</td>
+    	<td class="urenstaat">Toelichting</td></tr>
+<tr class="odd" align="center">
+        <td class="urenstaat">18</td>
+        <td class="urenstaat">Vr</td>
+		<td class="urenstaat">1</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d1" VALUE="" TABINDEX=1 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',1);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d1" VALUE="8" TABINDEX=32 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',1);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d1" VALUE="" TABINDEX=63 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',1);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d1" VALUE="" TABINDEX=94 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',1);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d1" VALUE="" TABINDEX=125 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',1);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d1" VALUE="" TABINDEX=156 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',1);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d1" VALUE="" TABINDEX=187 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',1);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d1" VALUE="" TABINDEX=218 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',1);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d1" VALUE="" TABINDEX=280 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',1);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d1" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d1" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d1" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d1" VALUE="310" TABINDEX=311 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',1);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d1" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d1" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d1" VALUE="" TABINDEX=342 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(1);"></td>
+		</tr>
+<tr class="weekend" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Za</td>
+		<td class="urenstaat">2</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d2" VALUE="" TABINDEX=2 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',2);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d2" VALUE="" TABINDEX=33 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',2);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d2" VALUE="" TABINDEX=64 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',2);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d2" VALUE="" TABINDEX=95 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',2);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d2" VALUE="" TABINDEX=126 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',2);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d2" VALUE="" TABINDEX=157 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',2);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d2" VALUE="" TABINDEX=188 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',2);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d2" VALUE="" TABINDEX=219 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',2);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d2" VALUE="" TABINDEX=281 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',2);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d2" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d2" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d2" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d2" VALUE="" TABINDEX=312 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',2);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d2" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d2" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d2" VALUE="" TABINDEX=343 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(2);"></td>
+		</tr>
+<tr class="weekend" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Zo</td>
+		<td class="urenstaat">3</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d3" VALUE="" TABINDEX=3 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',3);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d3" VALUE="" TABINDEX=34 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',3);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d3" VALUE="" TABINDEX=65 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',3);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d3" VALUE="" TABINDEX=96 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',3);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d3" VALUE="" TABINDEX=127 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',3);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d3" VALUE="" TABINDEX=158 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',3);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d3" VALUE="" TABINDEX=189 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',3);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d3" VALUE="" TABINDEX=220 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',3);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d3" VALUE="" TABINDEX=282 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',3);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d3" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d3" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d3" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d3" VALUE="" TABINDEX=313 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',3);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d3" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d3" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d3" VALUE="" TABINDEX=344 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(3);"></td>
+		</tr>
+<tr class="even" align="center">
+        <td class="urenstaat">19</td>
+        <td class="urenstaat">Ma</td>
+		<td class="urenstaat">4</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d4" VALUE="" TABINDEX=4 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',4);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d4" VALUE="8" TABINDEX=35 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',4);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d4" VALUE="" TABINDEX=66 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',4);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d4" VALUE="" TABINDEX=97 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',4);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d4" VALUE="" TABINDEX=128 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',4);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d4" VALUE="" TABINDEX=159 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',4);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d4" VALUE="" TABINDEX=190 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',4);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d4" VALUE="" TABINDEX=221 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',4);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d4" VALUE="" TABINDEX=283 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',4);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d4" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d4" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d4" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d4" VALUE="310" TABINDEX=314 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',4);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d4" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d4" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d4" VALUE="" TABINDEX=345 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(4);"></td>
+		</tr>
+<tr class="feestdag" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Di</td>
+		<td class="urenstaat">5</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d5" VALUE="" TABINDEX=5 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',5);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d5" VALUE="" TABINDEX=36 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',5);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d5" VALUE="" TABINDEX=67 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',5);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d5" VALUE="" TABINDEX=98 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',5);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d5" VALUE="" TABINDEX=129 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',5);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d5" VALUE="" TABINDEX=160 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',5);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d5" VALUE="" TABINDEX=191 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',5);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d5" VALUE="" TABINDEX=222 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',5);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d5" VALUE="8" TABINDEX=284 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',5);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d5" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d5" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d5" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d5" VALUE="" TABINDEX=315 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',5);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d5" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d5" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d5" VALUE="" TABINDEX=346 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(5);"></td>
+		</tr>
+<tr class="even" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Wo</td>
+		<td class="urenstaat">6</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d6" VALUE="" TABINDEX=6 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',6);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d6" VALUE="8" TABINDEX=37 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',6);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d6" VALUE="" TABINDEX=68 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',6);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d6" VALUE="" TABINDEX=99 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',6);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d6" VALUE="" TABINDEX=130 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',6);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d6" VALUE="" TABINDEX=161 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',6);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d6" VALUE="" TABINDEX=192 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',6);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d6" VALUE="" TABINDEX=223 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',6);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d6" VALUE="" TABINDEX=285 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',6);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d6" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d6" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d6" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d6" VALUE="" TABINDEX=316 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',6);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d6" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d6" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d6" VALUE="" TABINDEX=347 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(6);"></td>
+		</tr>
+<tr class="odd" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Do</td>
+		<td class="urenstaat">7</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d7" VALUE="" TABINDEX=7 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',7);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d7" VALUE="8" TABINDEX=38 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',7);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d7" VALUE="" TABINDEX=69 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',7);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d7" VALUE="" TABINDEX=100 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',7);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d7" VALUE="" TABINDEX=131 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',7);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d7" VALUE="" TABINDEX=162 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',7);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d7" VALUE="" TABINDEX=193 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',7);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d7" VALUE="" TABINDEX=224 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',7);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d7" VALUE="" TABINDEX=286 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',7);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d7" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d7" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d7" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d7" VALUE="" TABINDEX=317 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',7);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d7" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d7" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d7" VALUE="" TABINDEX=348 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(7);"></td>
+		</tr>
+<tr class="even" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Vr</td>
+		<td class="urenstaat">8</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d8" VALUE="" TABINDEX=8 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',8);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d8" VALUE="8" TABINDEX=39 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',8);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d8" VALUE="" TABINDEX=70 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',8);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d8" VALUE="" TABINDEX=101 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',8);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d8" VALUE="" TABINDEX=132 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',8);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d8" VALUE="" TABINDEX=163 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',8);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d8" VALUE="" TABINDEX=194 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',8);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d8" VALUE="" TABINDEX=225 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',8);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d8" VALUE="" TABINDEX=287 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',8);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d8" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d8" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d8" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d8" VALUE="" TABINDEX=318 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',8);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d8" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d8" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d8" VALUE="" TABINDEX=349 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(8);"></td>
+		</tr>
+<tr class="weekend" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Za</td>
+		<td class="urenstaat">9</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d9" VALUE="" TABINDEX=9 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',9);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d9" VALUE="" TABINDEX=40 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',9);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d9" VALUE="" TABINDEX=71 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',9);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d9" VALUE="" TABINDEX=102 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',9);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d9" VALUE="" TABINDEX=133 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',9);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d9" VALUE="" TABINDEX=164 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',9);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d9" VALUE="" TABINDEX=195 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',9);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d9" VALUE="" TABINDEX=226 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',9);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d9" VALUE="" TABINDEX=288 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',9);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d9" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d9" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d9" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d9" VALUE="" TABINDEX=319 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',9);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d9" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d9" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d9" VALUE="" TABINDEX=350 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(9);"></td>
+		</tr>
+<tr class="weekend" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Zo</td>
+		<td class="urenstaat">10</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d10" VALUE="" TABINDEX=10 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',10);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d10" VALUE="" TABINDEX=41 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',10);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d10" VALUE="" TABINDEX=72 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',10);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d10" VALUE="" TABINDEX=103 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',10);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d10" VALUE="" TABINDEX=134 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',10);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d10" VALUE="" TABINDEX=165 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',10);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d10" VALUE="" TABINDEX=196 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',10);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d10" VALUE="" TABINDEX=227 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',10);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d10" VALUE="" TABINDEX=289 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',10);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d10" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d10" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d10" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d10" VALUE="" TABINDEX=320 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',10);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d10" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d10" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d10" VALUE="" TABINDEX=351 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(10);"></td>
+		</tr>
+<tr class="odd" align="center">
+        <td class="urenstaat">20</td>
+        <td class="urenstaat">Ma</td>
+		<td class="urenstaat">11</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d11" VALUE="" TABINDEX=11 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',11);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d11" VALUE="" TABINDEX=42 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',11);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d11" VALUE="" TABINDEX=73 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',11);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d11" VALUE="" TABINDEX=104 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',11);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d11" VALUE="" TABINDEX=135 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',11);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d11" VALUE="" TABINDEX=166 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',11);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d11" VALUE="" TABINDEX=197 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',11);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d11" VALUE="" TABINDEX=228 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',11);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d11" VALUE="" TABINDEX=290 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',11);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d11" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d11" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d11" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d11" VALUE="" TABINDEX=321 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',11);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d11" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d11" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d11" VALUE="" TABINDEX=352 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(11);"></td>
+		</tr>
+<tr class="even" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Di</td>
+		<td class="urenstaat">12</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d12" VALUE="" TABINDEX=12 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',12);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d12" VALUE="" TABINDEX=43 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',12);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d12" VALUE="" TABINDEX=74 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',12);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d12" VALUE="" TABINDEX=105 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',12);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d12" VALUE="" TABINDEX=136 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',12);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d12" VALUE="" TABINDEX=167 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',12);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d12" VALUE="" TABINDEX=198 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',12);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d12" VALUE="" TABINDEX=229 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',12);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d12" VALUE="" TABINDEX=291 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',12);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d12" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d12" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d12" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d12" VALUE="" TABINDEX=322 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',12);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d12" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d12" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d12" VALUE="" TABINDEX=353 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(12);"></td>
+		</tr>
+<tr class="odd" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Wo</td>
+		<td class="urenstaat">13</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d13" VALUE="" TABINDEX=13 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',13);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d13" VALUE="" TABINDEX=44 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',13);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d13" VALUE="" TABINDEX=75 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',13);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d13" VALUE="" TABINDEX=106 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',13);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d13" VALUE="" TABINDEX=137 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',13);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d13" VALUE="" TABINDEX=168 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',13);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d13" VALUE="" TABINDEX=199 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',13);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d13" VALUE="" TABINDEX=230 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',13);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d13" VALUE="" TABINDEX=292 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',13);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d13" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d13" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d13" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d13" VALUE="" TABINDEX=323 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',13);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d13" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d13" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d13" VALUE="" TABINDEX=354 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(13);"></td>
+		</tr>
+<tr class="feestdag" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Do</td>
+		<td class="urenstaat">14</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d14" VALUE="" TABINDEX=14 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',14);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d14" VALUE="" TABINDEX=45 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',14);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d14" VALUE="" TABINDEX=76 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',14);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d14" VALUE="" TABINDEX=107 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',14);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d14" VALUE="" TABINDEX=138 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',14);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d14" VALUE="" TABINDEX=169 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',14);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d14" VALUE="" TABINDEX=200 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',14);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d14" VALUE="" TABINDEX=231 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',14);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d14" VALUE="8" TABINDEX=293 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',14);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d14" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d14" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d14" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d14" VALUE="" TABINDEX=324 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',14);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d14" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d14" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d14" VALUE="" TABINDEX=355 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(14);"></td>
+		</tr>
+<tr class="odd" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Vr</td>
+		<td class="urenstaat">15</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d15" VALUE="" TABINDEX=15 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',15);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d15" VALUE="" TABINDEX=46 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',15);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d15" VALUE="" TABINDEX=77 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',15);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d15" VALUE="" TABINDEX=108 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',15);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d15" VALUE="" TABINDEX=139 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',15);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d15" VALUE="" TABINDEX=170 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',15);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d15" VALUE="" TABINDEX=201 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',15);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d15" VALUE="" TABINDEX=232 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',15);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d15" VALUE="" TABINDEX=294 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',15);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d15" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d15" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d15" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d15" VALUE="" TABINDEX=325 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',15);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d15" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d15" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d15" VALUE="" TABINDEX=356 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(15);"></td>
+		</tr>
+<tr class="weekend" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Za</td>
+		<td class="urenstaat">16</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d16" VALUE="" TABINDEX=16 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',16);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d16" VALUE="" TABINDEX=47 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',16);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d16" VALUE="" TABINDEX=78 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',16);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d16" VALUE="" TABINDEX=109 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',16);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d16" VALUE="" TABINDEX=140 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',16);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d16" VALUE="" TABINDEX=171 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',16);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d16" VALUE="" TABINDEX=202 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',16);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d16" VALUE="" TABINDEX=233 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',16);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d16" VALUE="" TABINDEX=295 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',16);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d16" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d16" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d16" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d16" VALUE="" TABINDEX=326 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',16);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d16" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d16" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d16" VALUE="" TABINDEX=357 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(16);"></td>
+		</tr>
+<tr class="weekend" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Zo</td>
+		<td class="urenstaat">17</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d17" VALUE="" TABINDEX=17 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',17);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d17" VALUE="" TABINDEX=48 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',17);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d17" VALUE="" TABINDEX=79 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',17);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d17" VALUE="" TABINDEX=110 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',17);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d17" VALUE="" TABINDEX=141 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',17);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d17" VALUE="" TABINDEX=172 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',17);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d17" VALUE="" TABINDEX=203 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',17);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d17" VALUE="" TABINDEX=234 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',17);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d17" VALUE="" TABINDEX=296 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',17);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d17" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d17" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d17" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d17" VALUE="" TABINDEX=327 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',17);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d17" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d17" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d17" VALUE="" TABINDEX=358 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(17);"></td>
+		</tr>
+<tr class="even" align="center">
+        <td class="urenstaat">21</td>
+        <td class="urenstaat">Ma</td>
+		<td class="urenstaat">18</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d18" VALUE="" TABINDEX=18 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',18);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d18" VALUE="" TABINDEX=49 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',18);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d18" VALUE="" TABINDEX=80 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',18);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d18" VALUE="" TABINDEX=111 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',18);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d18" VALUE="" TABINDEX=142 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',18);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d18" VALUE="" TABINDEX=173 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',18);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d18" VALUE="" TABINDEX=204 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',18);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d18" VALUE="" TABINDEX=235 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',18);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d18" VALUE="" TABINDEX=297 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',18);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d18" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d18" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d18" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d18" VALUE="" TABINDEX=328 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',18);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d18" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d18" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d18" VALUE="" TABINDEX=359 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(18);"></td>
+		</tr>
+<tr class="odd" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Di</td>
+		<td class="urenstaat">19</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d19" VALUE="" TABINDEX=19 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',19);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d19" VALUE="" TABINDEX=50 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',19);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d19" VALUE="" TABINDEX=81 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',19);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d19" VALUE="" TABINDEX=112 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',19);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d19" VALUE="" TABINDEX=143 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',19);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d19" VALUE="" TABINDEX=174 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',19);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d19" VALUE="" TABINDEX=205 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',19);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d19" VALUE="" TABINDEX=236 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',19);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d19" VALUE="" TABINDEX=298 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',19);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d19" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d19" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d19" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d19" VALUE="" TABINDEX=329 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',19);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d19" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d19" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d19" VALUE="" TABINDEX=360 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(19);"></td>
+		</tr>
+<tr class="even" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Wo</td>
+		<td class="urenstaat">20</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d20" VALUE="" TABINDEX=20 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',20);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d20" VALUE="" TABINDEX=51 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',20);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d20" VALUE="" TABINDEX=82 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',20);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d20" VALUE="" TABINDEX=113 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',20);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d20" VALUE="" TABINDEX=144 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',20);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d20" VALUE="" TABINDEX=175 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',20);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d20" VALUE="" TABINDEX=206 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',20);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d20" VALUE="" TABINDEX=237 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',20);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d20" VALUE="" TABINDEX=299 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',20);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d20" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d20" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d20" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d20" VALUE="" TABINDEX=330 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',20);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d20" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d20" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d20" VALUE="" TABINDEX=361 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(20);"></td>
+		</tr>
+<tr class="odd" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Do</td>
+		<td class="urenstaat">21</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d21" VALUE="" TABINDEX=21 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',21);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d21" VALUE="" TABINDEX=52 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',21);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d21" VALUE="" TABINDEX=83 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',21);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d21" VALUE="" TABINDEX=114 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',21);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d21" VALUE="" TABINDEX=145 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',21);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d21" VALUE="" TABINDEX=176 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',21);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d21" VALUE="" TABINDEX=207 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',21);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d21" VALUE="" TABINDEX=238 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',21);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d21" VALUE="" TABINDEX=300 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',21);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d21" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d21" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d21" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d21" VALUE="" TABINDEX=331 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',21);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d21" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d21" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d21" VALUE="" TABINDEX=362 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(21);"></td>
+		</tr>
+<tr class="even" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Vr</td>
+		<td class="urenstaat">22</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d22" VALUE="" TABINDEX=22 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',22);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d22" VALUE="" TABINDEX=53 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',22);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d22" VALUE="" TABINDEX=84 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',22);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d22" VALUE="" TABINDEX=115 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',22);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d22" VALUE="" TABINDEX=146 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',22);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d22" VALUE="" TABINDEX=177 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',22);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d22" VALUE="" TABINDEX=208 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',22);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d22" VALUE="" TABINDEX=239 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',22);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d22" VALUE="" TABINDEX=301 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',22);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d22" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d22" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d22" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d22" VALUE="" TABINDEX=332 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',22);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d22" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d22" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d22" VALUE="" TABINDEX=363 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(22);"></td>
+		</tr>
+<tr class="weekend" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Za</td>
+		<td class="urenstaat">23</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d23" VALUE="" TABINDEX=23 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',23);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d23" VALUE="" TABINDEX=54 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',23);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d23" VALUE="" TABINDEX=85 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',23);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d23" VALUE="" TABINDEX=116 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',23);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d23" VALUE="" TABINDEX=147 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',23);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d23" VALUE="" TABINDEX=178 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',23);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d23" VALUE="" TABINDEX=209 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',23);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d23" VALUE="" TABINDEX=240 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',23);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d23" VALUE="" TABINDEX=302 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',23);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d23" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d23" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d23" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d23" VALUE="" TABINDEX=333 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',23);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d23" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d23" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d23" VALUE="" TABINDEX=364 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(23);"></td>
+		</tr>
+<tr class="weekend" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Zo</td>
+		<td class="urenstaat">24</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d24" VALUE="" TABINDEX=24 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',24);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d24" VALUE="" TABINDEX=55 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',24);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d24" VALUE="" TABINDEX=86 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',24);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d24" VALUE="" TABINDEX=117 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',24);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d24" VALUE="" TABINDEX=148 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',24);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d24" VALUE="" TABINDEX=179 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',24);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d24" VALUE="" TABINDEX=210 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',24);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d24" VALUE="" TABINDEX=241 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',24);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d24" VALUE="" TABINDEX=303 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',24);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d24" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d24" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d24" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d24" VALUE="" TABINDEX=334 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',24);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d24" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d24" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d24" VALUE="" TABINDEX=365 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(24);"></td>
+		</tr>
+<tr class="feestdag" align="center">
+        <td class="urenstaat">22</td>
+        <td class="urenstaat">Ma</td>
+		<td class="urenstaat">25</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d25" VALUE="" TABINDEX=25 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',25);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d25" VALUE="" TABINDEX=56 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',25);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d25" VALUE="" TABINDEX=87 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',25);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d25" VALUE="" TABINDEX=118 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',25);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d25" VALUE="" TABINDEX=149 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',25);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d25" VALUE="" TABINDEX=180 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',25);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d25" VALUE="" TABINDEX=211 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',25);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d25" VALUE="" TABINDEX=242 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',25);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d25" VALUE="8" TABINDEX=304 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',25);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d25" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d25" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d25" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d25" VALUE="" TABINDEX=335 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',25);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d25" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d25" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d25" VALUE="" TABINDEX=366 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(25);"></td>
+		</tr>
+<tr class="even" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Di</td>
+		<td class="urenstaat">26</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d26" VALUE="" TABINDEX=26 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',26);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d26" VALUE="" TABINDEX=57 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',26);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d26" VALUE="" TABINDEX=88 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',26);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d26" VALUE="" TABINDEX=119 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',26);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d26" VALUE="" TABINDEX=150 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',26);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d26" VALUE="" TABINDEX=181 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',26);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d26" VALUE="" TABINDEX=212 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',26);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d26" VALUE="" TABINDEX=243 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',26);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d26" VALUE="" TABINDEX=305 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',26);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d26" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d26" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d26" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d26" VALUE="" TABINDEX=336 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',26);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d26" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d26" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d26" VALUE="" TABINDEX=367 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(26);"></td>
+		</tr>
+<tr class="odd" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Wo</td>
+		<td class="urenstaat">27</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d27" VALUE="" TABINDEX=27 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',27);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d27" VALUE="" TABINDEX=58 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',27);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d27" VALUE="" TABINDEX=89 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',27);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d27" VALUE="" TABINDEX=120 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',27);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d27" VALUE="" TABINDEX=151 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',27);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d27" VALUE="" TABINDEX=182 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',27);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d27" VALUE="" TABINDEX=213 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',27);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d27" VALUE="" TABINDEX=244 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',27);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d27" VALUE="" TABINDEX=306 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',27);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d27" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d27" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d27" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d27" VALUE="" TABINDEX=337 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',27);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d27" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d27" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d27" VALUE="" TABINDEX=368 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(27);"></td>
+		</tr>
+<tr class="even" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Do</td>
+		<td class="urenstaat">28</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d28" VALUE="" TABINDEX=28 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',28);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d28" VALUE="" TABINDEX=59 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',28);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d28" VALUE="" TABINDEX=90 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',28);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d28" VALUE="" TABINDEX=121 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',28);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d28" VALUE="" TABINDEX=152 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',28);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d28" VALUE="" TABINDEX=183 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',28);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d28" VALUE="" TABINDEX=214 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',28);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d28" VALUE="" TABINDEX=245 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',28);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d28" VALUE="" TABINDEX=307 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',28);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d28" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d28" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d28" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d28" VALUE="" TABINDEX=338 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',28);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d28" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d28" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d28" VALUE="" TABINDEX=369 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(28);"></td>
+		</tr>
+<tr class="odd" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Vr</td>
+		<td class="urenstaat">29</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d29" VALUE="" TABINDEX=29 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',29);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d29" VALUE="" TABINDEX=60 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',29);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d29" VALUE="" TABINDEX=91 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',29);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d29" VALUE="" TABINDEX=122 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',29);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d29" VALUE="" TABINDEX=153 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',29);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d29" VALUE="" TABINDEX=184 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',29);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d29" VALUE="" TABINDEX=215 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',29);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d29" VALUE="" TABINDEX=246 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',29);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d29" VALUE="" TABINDEX=308 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',29);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d29" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d29" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d29" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d29" VALUE="" TABINDEX=339 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',29);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d29" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d29" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d29" VALUE="" TABINDEX=370 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(29);"></td>
+		</tr>
+<tr class="weekend" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Za</td>
+		<td class="urenstaat">30</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d30" VALUE="" TABINDEX=30 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',30);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d30" VALUE="" TABINDEX=61 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',30);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d30" VALUE="" TABINDEX=92 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',30);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d30" VALUE="" TABINDEX=123 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',30);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d30" VALUE="" TABINDEX=154 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',30);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d30" VALUE="" TABINDEX=185 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',30);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d30" VALUE="" TABINDEX=216 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',30);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d30" VALUE="" TABINDEX=247 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',30);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d30" VALUE="" TABINDEX=309 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',30);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d30" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d30" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d30" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d30" VALUE="" TABINDEX=340 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',30);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d30" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d30" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d30" VALUE="" TABINDEX=371 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(30);"></td>
+		</tr>
+<tr class="weekend" align="center">
+        <td class="urenstaat">&#160;</td>
+        <td class="urenstaat">Zo</td>
+		<td class="urenstaat">31</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d31" VALUE="" TABINDEX=31 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_alg_u_d',31);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d31" VALUE="" TABINDEX=62 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_lee_u_d',31);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d31" VALUE="" TABINDEX=93 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_cur_u_d',31);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d31" VALUE="" TABINDEX=124 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ziek_u_d',31);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d31" VALUE="" TABINDEX=155 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_mob_u_d',31);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d31" VALUE="" TABINDEX=186 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_verlof_u_d',31);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d31" VALUE="" TABINDEX=217 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_ov_u_d',31);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d31" VALUE="" TABINDEX=248 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_bv_u_d',31);"></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d31" VALUE="" TABINDEX=310 SIZE=5 MAXLENGTH=5  ONBLUR="updateTotalsHours('u_feest_u_d',31);"></td>
+		<td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="disabled_d31" VALUE=""><INPUT TYPE="HIDDEN" NAME="u_total_orig_d31" VALUE="0"><INPUT TYPE="TEXT" NAME="u_total_d31" VALUE="" SIZE=5 READONLY ></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d31" VALUE="" TABINDEX=341 SIZE=4 MAXLENGTH=4  ONBLUR="updateTotalsKilometers('u_zkm_u_d',31);"></td>
+        <td class="urenstaat"><INPUT TYPE="HIDDEN" NAME="u_totalKM_orig_d31" VALUE="0"><INPUT TYPE="TEXT" NAME="u_totalKM_d31" VALUE="" SIZE=4 READONLY ></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_toelichting_o_d31" VALUE="" TABINDEX=372 SIZE=20 MAXLENGTH=50  ONBLUR="validateComment(31);"></td>
+		</tr>
+		<tr class="tableheader" align="center"><td class="urenstaat" colspan="3">Totalen</td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_alg_u_d" VALUE="" SIZE=5 READONLY></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_lee_u_d" VALUE="" SIZE=5 READONLY></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_cur_u_d" VALUE="" SIZE=5 READONLY></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ziek_u_d" VALUE="" SIZE=5 READONLY></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_mob_u_d" VALUE="" SIZE=5 READONLY></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_verlof_u_d" VALUE="" SIZE=5 READONLY></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_ov_u_d" VALUE="" SIZE=5 READONLY></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_bv_u_d" VALUE="" SIZE=5 READONLY></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_feest_u_d" VALUE="" SIZE=5 READONLY></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_total_d" VALUE="" SIZE=5 READONLY></td>
+		<td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_zkm_u_d" VALUE="" SIZE=5 READONLY></td>
+        <td class="urenstaat"><INPUT TYPE="TEXT" NAME="u_totalKM_d" VALUE="" SIZE=4 READONLY></td>
+		<td class="urenstaat">&#160;</td>
+		</tr></table></td></tr><tr><td class="urenstaat">&#160;</td></tr>
+<tr><td align="center" colspan="11"><INPUT NAME="SUBMIT" TYPE="SUBMIT" VALUE="Totalen berekenen + opslaan" TABINDEX=373 onclick="setSubmit(this.value);"><INPUT NAME="project" TYPE="hidden" VALUE="000001+2015"><INPUT NAME="HIDDEN_SUBMIT" TYPE="hidden" VALUE=""><INPUT NAME="projectID" TYPE="hidden" VALUE="000001"><INPUT NAME="phaseID" TYPE="hidden" VALUE="2015"><INPUT NAME="month" TYPE="hidden" VALUE="5"><INPUT NAME="year" TYPE="hidden" VALUE="2015 \r\n"></td></tr></table><center><br>LET OP: Wijzigen is na vrijgave niet meer mogelijk!</b><BR><INPUT NAME="SUBMIT" TYPE="SUBMIT" VALUE="Geef deze urenstaat vrij voor TOPIC administratie" onclick="setSubmit(this.value);"></form></center><BR>
+</div>
+</body>
+</html>
