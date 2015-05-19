@@ -86,6 +86,7 @@
     <ClInclude Include="Client.h" />
     <ClInclude Include="clientSSL.h" />
     <ClInclude Include="Driver.h" />
+    <ClInclude Include="formRow.h" />
     <ClInclude Include="GPSCoordinates.h" />
     <ClInclude Include="intranetTopicHoursTool.h" />
     <ClInclude Include="invaledRideType.h" />
@@ -102,6 +103,7 @@
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="clientSSL.cpp" />
     <ClCompile Include="Driver.cpp" />
+    <ClCompile Include="formRow.cpp" />
     <ClCompile Include="GPSCoordinates.cpp" />
     <ClCompile Include="intranetTopicHoursTool.cpp" />
     <ClCompile Include="invaledRideType.cpp" />

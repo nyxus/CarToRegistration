@@ -6,6 +6,6 @@ webpage::webpage(std::string rawPage, std::string regexForm) :rawPage(rawPage), 
 }
 
 
-std::map<std::string, std::string> webpage::getFormData(){
+std::vector<formRow> webpage::getFormData(){
 	return formData;
 };

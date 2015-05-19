@@ -1,19 +1,21 @@
 #pragma once
 #include <iostream>
 #include <string>
-#include <map>
+#include <vector>
 #include <regex>
+#include "formRow.h"
+
 class webpage
 {
 	
 public:
 	webpage(std::string, std::string);
 	~webpage(){};
-	std::map<std::string, std::string> getFormData();
+	std::vector <formRow> getFormData();
 protected:
 	std::string rawPage;
 	std::string regexForm;
-	std::map<std::string, std::string> formData;
+	std::vector <formRow> formData;
 
 	virtual void getDataFormFromPage() = 0;
 };

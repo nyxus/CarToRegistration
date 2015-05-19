@@ -2,7 +2,7 @@
 #include "intranetTopicHoursTool.h"
 
 
-intranetTopicHoursTool::intranetTopicHoursTool(std::string page) :webpage(page, "<INPUT TYPE=\"[A - Z]{1, }\" NAME=\"([a - zA - Z_0 - 9]{1, })\" VALUE=\"([0 - 9]{0, })\"[a-zA-Z0-9 \" = ',;()_]{0,}>")
+intranetTopicHoursTool::intranetTopicHoursTool(std::string page) :webpage(page, "<INPUT TYPE=\"([A-Z]+)\" NAME=\"([a-zA-Z_0-9]+)\" VALUE=\"([0-9]{0,15})\"[a-zA-Z0-9 \"= ',;()_]*>")
 {
 	getDataFormFromPage();
 }
@@ -10,13 +10,14 @@ intranetTopicHoursTool::intranetTopicHoursTool(std::string page) :webpage(page, 
 void intranetTopicHoursTool::getDataFormFromPage(){
 	std::cout << std::endl << std::endl << "START REGEX FOR PAGE" << std::endl;
 	try {
-		std::regex re("<INPUT (TYPE)=\"([A-Z]+)\"");
+		std::regex re(regexForm);
 		std::sregex_iterator next(rawPage.begin(), rawPage.end(), re);
 		std::sregex_iterator end;
 		std::smatch sm;
 		while (next != end) {
 			std::smatch match = *next;
 			std::cout << match.str() << "\n" << "    subs: " << match[1].str() << ", " << match[2].str()  <<std::endl;
+			formData.push_back(formRow(match[1].str(), match[2].str(), match[3].str()));
 			next++;
 		}
 	}

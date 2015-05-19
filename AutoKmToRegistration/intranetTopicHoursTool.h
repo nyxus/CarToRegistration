@@ -8,5 +8,6 @@ public:
 	~intranetTopicHoursTool(){};
 private:
 	void getDataFormFromPage();
+
 };
 
